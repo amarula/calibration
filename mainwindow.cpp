@@ -152,7 +152,7 @@ void MainWindow::readInputDevice()
             }
             // For multi-touch, you might also look at ABS_MT_POSITION_X, ABS_MT_POSITION_Y
             // and ABS_MT_TRACKING_ID. For ts_calibrate, usually single touch is sufficient.
-        } else if (ev.type == EV_SYN && ev.code == SYN_REPORT) {
+        } else if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1) {
             // SYN_REPORT indicates a complete event packet has been sent
             if (hasX && hasY) {
                 QPoint rawTouchPoint(currentRawX, currentRawY);
