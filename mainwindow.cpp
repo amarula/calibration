@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
       hasY(false)
 {
     // Do NOT set Qt::WA_AcceptTouchEvents as we are reading raw input directly.
-    setFixedSize(800, 600); // Fixed size for consistent calibration points
+    setFixedSize(800, 480); // Fixed size for consistent calibration points
 
     // Setup UI
     QWidget *centralWidget = new QWidget(this);
