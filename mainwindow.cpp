@@ -136,10 +136,37 @@ bool MainWindow::event(QEvent *event)
     return QMainWindow::event(event); // Pass other events to base class
 }
 
+QPointF MainWindow::calculateMeanOfPoints(const std::vector<QPoint>& points) {
+    // Check if the vector is empty to avoid division by zero.
+    if (points.empty()) {
+        qWarning("Input vector of points is empty. Returning QPointF(0.0, 0.0).");
+        return QPointF(0.0, 0.0);
+    }
+
+    long long sumX = 0; // Use long long to prevent overflow for large number of points
+    long long sumY = 0; // Use long long to prevent overflow for large number of points
+
+    // Accumulate the sum of X and Y coordinates
+    for (const QPoint& point : points) {
+        sumX += point.x();
+        sumY += point.y();
+    }
+
+    // Calculate the mean X and Y coordinates
+    // Cast to double to ensure floating-point division
+    double meanX = static_cast<double>(sumX) / points.size();
+    double meanY = static_cast<double>(sumY) / points.size();
+
+    return QPointF(meanX, meanY);
+}
+
+#define MAX_POINTS 10
+
 void MainWindow::readInputDevice()
 {
     struct input_event ev;
     ssize_t bytesRead;
+    std::vector<QPoint> Points;
 
     while ((bytesRead = read(inputFd, &ev, sizeof(ev))) == sizeof(ev)) {
         if (ev.type == EV_ABS) {
@@ -155,10 +182,14 @@ void MainWindow::readInputDevice()
         } else if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1) {
             // SYN_REPORT indicates a complete event packet has been sent
             if (hasX && hasY) {
-                QPoint rawTouchPoint(currentRawX, currentRawY);
                 qDebug() << "Raw touch event received: X=" << currentRawX << "Y=" << currentRawY;
 
-                if (currentPointIndex < targetPoints.size()) {
+                Points.push_back(QPoint(currentRawX, currentRawX));
+
+                if (Points.size() >= MAX_POINTS && currentPointIndex < targetPoints.size()) {
+                    QPointF result = calculateMeanOfPoints(Points);
+                    QPoint rawTouchPoint(result.x(), result.y());
+                    Points.clear();
                     actualTouchPoints.append(rawTouchPoint);
                     qDebug() << "Recorded raw touch point:" << rawTouchPoint << "for target:" << targetPoints[currentPointIndex];
                     currentPointIndex++;
@@ -177,6 +208,9 @@ void MainWindow::readInputDevice()
                 hasX = false;
                 hasY = false;
             }
+        } else if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 0) {
+            /* Clear the vector in case of release */
+            Points.clear();
         }
     }
 

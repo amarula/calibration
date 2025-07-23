@@ -31,6 +31,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     // We'll still override event() for general Qt events, but touch handling moves to readInputDevice()
     bool event(QEvent *event) override;
+    QPointF calculateMeanOfPoints(const std::vector<QPoint, std::allocator<QPoint> >&);
 
 private slots:
     void readInputDevice(); // New slot to read from the input device
