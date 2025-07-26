@@ -170,6 +170,7 @@ void MainWindow::readInputDevice()
     struct input_event ev;
     ssize_t bytesRead;
     std::vector<QPoint> Points;
+    bool pen_down = false;
 
     while ((bytesRead = read(inputFd, &ev, sizeof(ev))) == sizeof(ev)) {
         if (ev.type == EV_ABS) {
@@ -182,9 +183,10 @@ void MainWindow::readInputDevice()
             }
             // For multi-touch, you might also look at ABS_MT_POSITION_X, ABS_MT_POSITION_Y
             // and ABS_MT_TRACKING_ID. For ts_calibrate, usually single touch is sufficient.
-        } else if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1) {
+        } else if ((ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1) || pen_down == true) {
             // SYN_REPORT indicates a complete event packet has been sent
             if (hasX && hasY) {
+                pen_down = true;
                 qDebug() << "Raw touch event received: X=" << currentRawX << "Y=" << currentRawY;
 
                 Points.push_back(QPoint(currentRawX, currentRawX));
@@ -213,6 +215,9 @@ void MainWindow::readInputDevice()
             }
         } else if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 0) {
             /* Clear the vector in case of release */
+            pen_down = false;
+            hasX = false;
+            hasY = false;
             Points.clear();
         }
     }
