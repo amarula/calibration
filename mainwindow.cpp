@@ -123,17 +123,19 @@ bool MainWindow::event(QEvent *event)
             qDebug() << "Mouse click detected (for fallback/testing):" << mouseEvent->pos();
             // You might want to remove this block if you strictly only want raw input.
             // For now, it provides a fallback if raw input setup is tricky.
-            // actualTouchPoints.append(mouseEvent->pos());
-            // currentPointIndex++;
-            // if (currentPointIndex < targetPoints.size()) {
-            //     displayMessage("Tap the next target.");
-            // } else {
-            //     displayMessage("Calculating calibration...");
-            //     calculateTransformationMatrix();
-            //     displayMessage("Calibration Complete! Check console for matrix.");
-            // }
-            // update();
-            // return true;
+#if defined(DEBUG)
+            actualTouchPoints.append(mouseEvent->pos());
+            currentPointIndex++;
+            if (currentPointIndex < targetPoints.size()) {
+                displayMessage("Tap the next target.");
+            } else {
+                displayMessage("Calculating calibration...");
+                calculateTransformationMatrix();
+                displayMessage("Calibration Complete! Check console for matrix.");
+            }
+            update();
+            return true;
+#endif
         }
     }
     return QMainWindow::event(event); // Pass other events to base class
