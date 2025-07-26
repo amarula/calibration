@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <QApplication>
+#include <QScreen>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -10,8 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
       hasX(false),
       hasY(false)
 {
-    // Do NOT set Qt::WA_AcceptTouchEvents as we are reading raw input directly.
-    setFixedSize(800, 480); // Fixed size for consistent calibration points
+    QScreen *screen = QApplication::primaryScreen();
+
+    setFixedSize(screen->availableSize().width(), screen->availableSize().height());
 
     // Setup UI
     QWidget *centralWidget = new QWidget(this);
